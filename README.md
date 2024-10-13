@@ -1,6 +1,6 @@
 # Verificador de Pedidos
 
-**Versión:** 1.4
+**Versión:** 1.5
 
 ## Descripción
 
@@ -15,7 +15,7 @@ El **Verificador de Pedidos** es una extensión de Chrome diseñada para uso int
 2. **Verificar Números:**
    - Navega por cualquier página web (modificable en `manifest.json`).
    - Selecciona un número de 4 a 6 dígitos.
-   - La extensión te notificará si el número seleccionado está en la lista de pedidos que no deben ser entregados.
+   - La extensión mostrará un mensaje junto al número seleccionado indicando si el pedido está en la lista de pedidos que no deben ser entregados.
 
 3. **Indicador de Estado:**
    - El icono de la extensión muestra la cantidad de pedidos cargados cuando está activa.
