@@ -26,6 +26,7 @@ chrome.action.onClicked.addListener(function (tab) {
                                 { type: "promptOrders" },
                                 function (response) {
                                     if (chrome.runtime.lastError) {
+                                        // Manejar error si es necesario
                                     } else {
                                         updateBadgeAndIcon(
                                             isActive,
@@ -72,14 +73,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.type === "ordersUpdated") {
         chrome.storage.sync.get("isActive", function (data) {
             updateBadgeAndIcon(data.isActive, request.orders)
-        })
-    } else if (request.type === "notify") {
-        chrome.notifications.create({
-            type: "basic",
-            iconUrl: "icons/icon128.png",
-            title: "Verificador de Pedidos",
-            message: request.message,
-            priority: 1,
         })
     }
 })

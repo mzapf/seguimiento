@@ -1,29 +1,74 @@
 let orders = []
 let isActive = false
+let tooltip
 
 function handleMouseUp() {
-    const selection = window.getSelection().toString().trim()
+    const selection = window.getSelection()
+    const selectedText = selection.toString().trim()
 
-    if (!selection) {
+    if (!selectedText) {
+        removeTooltip()
         return
     }
 
     // Solo procesar si la selección es exactamente de 4 a 6 dígitos
-    if (/^\d{4,6}$/.test(selection)) {
+    if (/^\d{4,6}$/.test(selectedText)) {
         // Eliminar ceros iniciales
-        const number = selection.replace(/^0+/, "") || "0"
+        const number = selectedText.replace(/^0+/, "") || "0"
 
+        let message
         if (orders.includes(number)) {
-            chrome.runtime.sendMessage({
-                type: "notify",
-                message: `${number} está, no entregar.`,
-            })
+            message = `${number} está, no entregar.`
         } else {
-            chrome.runtime.sendMessage({
-                type: "notify",
-                message: `${number} no está, se puede entregar.`,
-            })
+            message = `${number} no está, se puede entregar.`
         }
+
+        // Mostrar tooltip
+        showTooltip(selection.getRangeAt(0).getBoundingClientRect(), message)
+    } else {
+        removeTooltip()
+    }
+}
+
+function showTooltip(boundingRect, message) {
+    removeTooltip() // Remover tooltip anterior si existe
+
+    tooltip = document.createElement("div")
+    tooltip.textContent = message
+
+    // Estilos del tooltip
+    tooltip.style.position = "fixed"
+    tooltip.style.backgroundColor = "#333"
+    tooltip.style.color = "#fff"
+    tooltip.style.padding = "5px 10px"
+    tooltip.style.borderRadius = "5px"
+    tooltip.style.fontSize = "14px"
+    tooltip.style.zIndex = "9999"
+    tooltip.style.top = `${boundingRect.bottom + 5}px`
+    tooltip.style.left = `${boundingRect.left}px`
+    tooltip.style.whiteSpace = "nowrap" // Evitar que el texto se divida en varias líneas
+    tooltip.style.maxWidth = "none" // Sin límite de ancho
+    tooltip.style.overflow = "hidden"
+    tooltip.style.textOverflow = "ellipsis" // Mostrar "..." si el texto es demasiado largo
+
+    document.body.appendChild(tooltip)
+
+    // Ajustar la posición horizontal si el tooltip se sale de la pantalla
+    const tooltipWidth = tooltip.offsetWidth
+    const windowWidth = window.innerWidth
+    let left = boundingRect.left
+
+    if (left + tooltipWidth > windowWidth) {
+        left = windowWidth - tooltipWidth - 10 // 10px de margen
+        if (left < 0) left = 0
+        tooltip.style.left = `${left}px`
+    }
+}
+
+function removeTooltip() {
+    if (tooltip) {
+        tooltip.remove()
+        tooltip = null
     }
 }
 
@@ -34,8 +79,11 @@ function updateState(data) {
 
     if (isActive && !previousIsActive) {
         document.addEventListener("mouseup", handleMouseUp)
+        document.addEventListener("mousedown", removeTooltip)
     } else if (!isActive && previousIsActive) {
         document.removeEventListener("mouseup", handleMouseUp)
+        document.removeEventListener("mousedown", removeTooltip)
+        removeTooltip()
     }
 }
 
